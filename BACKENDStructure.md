@@ -20,6 +20,8 @@
 4. npm install cors
 5. npm install dotenv
 6. npm install -D nodemon
+7. npm install jsonwebtoken
+8. npm install bcrypt
 
 ## Создание сервера:
 Создаем файл для переменных окружения .env
@@ -32,7 +34,7 @@ DB_HOST=<localhost> // Хост для режима разработки
 DB_PORT=<5432> // Порт который указывали при создании БД
 SECRET_KEY=random_str_key123
 ```
-Файл index.js
+Файл `index.js`
 ```javascript
 require("dotenv").config(); // для загрузки переменных окружения из файла .env
 const express = require('express'); // импорт express
@@ -42,7 +44,7 @@ app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // зап
 ```
 
 ## Подключение к БД:
-Создание файла db.js
+Создание файла `db.js`
 ```javascript
 const { Sequelize } = require("sequelize"); // импорт Sequelize
 module.exports = new Sequelize( // создаем объект класса Sequelize
@@ -56,7 +58,7 @@ module.exports = new Sequelize( // создаем объект класса Sequ
   }
 ); 
 ```
-Файл index.js
+Файл `index.js`
 ```javascript
 require("dotenv").config(); // для загрузки переменных окружения из файла .env
 const express = require('express'); // импорт express
@@ -79,7 +81,7 @@ start();
 ```
 
 ## Модели данных и связи между ними.
-Создание папки models и файла models.js
+Создание папки models и файла `models.js`
 ```javascript
 const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
 const { DataTypes } = require("sequelize"); // содержит различные типы данных, которые могут быть использованы при определении моделей
@@ -173,7 +175,7 @@ module.exports = {
   DeviceInfo,
 };
 ```
-Файл index.js
+Файл `index.js`
 ```javascript
 require("dotenv").config(); // для загрузки переменных окружения из файла .env
 const express = require('express'); // импорт express
@@ -186,6 +188,152 @@ conxt app = express(); // объект для запуска приложени�
 app.use(cors()) // подключаем CORS
 app.use(express.json()) // для парсинга json формата
 app.get('/', (req, res) => {res.status(200).json({message: "WORKING"})})
+
+const start = async () => { // функция для старта приложения
+  try {
+    await sequelize.authenticate(); // для проверки соединения с базой данных
+    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+start();
+```
+
+## Маршруты приложения
+Создание папки routes и файла index.js
+Создаем для каждой сущности файлы с маршрутами userRoutes.js, brandRoutes.js, typeRoutes.js, deviceRoutes.js
+Создаем для реализации логики каждого маршрута папку controllers и файлы userController.js, brandController.js, typeController.js, deviceController.js
+
+### Файлы userController.js, brandController.js, typeController.js, deviceController.js:
+Файл `userController.js`
+```javascript
+class UserController {
+  async registration(req, res) {}
+  async login(req, res) {}
+  async check(req, res) {}
+}
+
+module.exports = new UserController();
+```
+
+Файл `brandController.js`
+```javascript
+class BrandController {
+  async create(req, res) {}
+  async getAll(req, res) {}
+}
+
+module.exports = new BrandController();
+```
+
+Файл `typeController.js`
+```javascript
+class TypeController {
+  async create(req, res) {}
+  async getAll(req, res) {}
+}
+
+module.exports = new TypeController();
+```
+
+Файл `deviceController.js`
+```javascript
+class DeviceController {
+  async create(req, res) {}
+  async getAll(req, res) {}
+  async getOne(req, res) {}
+}
+
+module.exports = new DeviceController();
+```
+
+### Файлы userRoutes.js, brandRoutes.js, typeRoutes.js, deviceRoutes.js:
+Файл `userRoutes.js`
+```javascript
+const Router = require("express");
+const router = new Router();
+const userController = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware");
+
+router.post("/registration", userController.registration);
+router.post("/login", userController.login);
+router.get("/auth", userController.check);
+
+module.exports = router;
+```
+
+Файл `brandRoutes.js`
+```javascript
+const Router = require("express");
+const router = new Router();
+const brandController = require("../controllers/brandController");
+
+router.post('/', brandController.create)
+router.get('/', brandController.getAll)
+
+module.exports = router;
+```
+
+Файл `typeRoutes.js`
+```javascript
+const Router = require("express");
+const router = new Router();
+const typeController = require("../controllers/typeController");
+const checkRole = require("../middleware/checkRoleMiddleware");
+
+router.post("/", typeController.create);
+router.get("/", typeController.getAll);
+
+module.exports = router;
+```
+
+Файл `deviceRoutes.js`
+```javascript
+const Router = require("express");
+const router = new Router();
+const deviceController = require("../controllers/deviceController")
+
+router.post("/", deviceController.create);
+router.get("/", deviceController.getAll);
+router.get("/:id", deviceController.getOne);
+
+module.exports = router;
+```
+
+### Файл routes/index.js:
+```javascript
+const Router = require('express'); // импортируем класс Роутер
+const router = new Router(); // создаем объект этого класса
+const deviceRouter = require("./deviceRouter"); // роутер device
+const userRouter = require("./userRouter"); // роутер user
+const brandRouter = require("./brandRouter"); // роутер brand
+const typeRouter = require("./typeRouter"); // роутер type
+
+router.use("/user", userRouter); // маршрут для user
+router.use("/type", typeRouter); // маршрут для type
+router.use("/brand", brandRouter); // маршрут для brand
+router.use("/device", deviceRouter); // маршрут для device
+
+module.exports = router; // экспортируем роутер
+```
+
+### Файл index.js
+```javascript
+require("dotenv").config(); // для загрузки переменных окружения из файла .env
+const express = require('express'); // импорт express
+const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
+const cors = require("cors") // импорт cors
+const router = require("./routes/index"); // импортируем маршруты
+
+const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+
+conxt app = express(); // объект для запуска приложения
+app.use(cors()) // подключаем CORS
+app.use(express.json()) // для парсинга json формата
+app.use("/api", router); // для использования маршрутов в приложении
 
 const start = async () => { // функция для старта приложения
   try {

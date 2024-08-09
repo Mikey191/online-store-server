@@ -72,12 +72,12 @@ module.exports = new Sequelize( // создаем объект класса Sequ
 ```
 ### Файл `index.js`
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
+require("dotenv").config(); 
+const express = require('express'); 
 const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
-conxt app = express(); // Объект для запуска приложения
+conxt app = express(); 
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
 const start = async () => { // функция для старта приложения
   try {
@@ -168,7 +168,7 @@ Rating.belongsTo(Device);
 Device.hasMany(BasketDevice); // связь один ко многим
 BasketDevice.belongsTo(Device);
 
-Device.hasMany(DeviceInfo, {as: "info"}); // связь один ко многим
+Device.hasMany(DeviceInfo); // связь один ко многим
 DeviceInfo.belongsTo(Device);
 
 Type.belongsToMany(Brand, { through: TypeBrand }); // связь много ко многим. для этой связи создавали промежуточную таблицу TypeBrand
@@ -189,23 +189,23 @@ module.exports = {
 ```
 ### Файл `index.js`
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
-const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
+require("dotenv").config(); 
+const express = require('express'); 
+const sequelize = require("./db"); 
 const cors = require("cors") // импорт cors
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
-conxt app = express(); // объект для запуска приложения
+conxt app = express(); 
 app.use(cors()) // подключаем CORS
 app.use(express.json()) // для парсинга json формата
 app.get('/', (req, res) => {res.status(200).json({message: "WORKING"})})
 
-const start = async () => { // функция для старта приложения
+const start = async () => { 
   try {
-    await sequelize.authenticate(); // для проверки соединения с базой данных
-    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+    await sequelize.authenticate(); 
+    await sequelize.sync() 
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
   } catch (error) {
     console.log(error);
   }
@@ -334,24 +334,24 @@ module.exports = router; // экспортируем роутер
 
 ### Файл `index.js`
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
-const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
-const cors = require("cors") // импорт cors
+require("dotenv").config(); 
+const express = require('express'); 
+const sequelize = require("./db"); 
+const cors = require("cors") 
 const router = require("./routes/index"); // импортируем маршруты
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
-conxt app = express(); // объект для запуска приложения
-app.use(cors()) // подключаем CORS
-app.use(express.json()) // для парсинга json формата
+conxt app = express(); 
+app.use(cors()) 
+app.use(express.json()) 
 app.use("/api", router); // для использования маршрутов в приложении
 
-const start = async () => { // функция для старта приложения
+const start = async () => { 
   try {
-    await sequelize.authenticate(); // для проверки соединения с базой данных
-    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+    await sequelize.authenticate(); 
+    await sequelize.sync() 
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); 
   } catch (error) {
     console.log(error);
   }
@@ -399,28 +399,28 @@ module.exports = function (err, req, res, next) { // аргументы - оши
 
 ### Файл `index.js`
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
-const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
-const cors = require("cors") // импорт cors
-const router = require("./routes/index"); // импортируем маршруты
+require("dotenv").config(); 
+const express = require('express'); 
+const sequelize = require("./db"); 
+const cors = require("cors") 
+const router = require("./routes/index"); 
 const errorHandler = require("./middleware/ErrorHandingMiddleware"); // импортируем хендлер ошибок
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
-conxt app = express(); // объект для запуска приложения
-app.use(cors()) // подключаем CORS
-app.use(express.json()) // для парсинга json формата
-app.use("/api", router); // для использования маршрутов в приложении
+conxt app = express(); 
+app.use(cors()) 
+app.use(express.json()) 
+app.use("/api", router); 
 
 
 // Обработка ошибок должна быть в конце
 app.use(errorHandler);
-const start = async () => { // функция для старта приложения
+const start = async () => { 
   try {
-    await sequelize.authenticate(); // для проверки соединения с базой данных
-    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+    await sequelize.authenticate(); 
+    await sequelize.sync() 
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); 
   } catch (error) {
     console.log(error);
   }
@@ -430,7 +430,7 @@ start();
 ```
 
 ## 6. Добавление объектов Type и Brand в Базу Данных.
-### Файл `TypeController.js`
+### Файл `typeController.js`
 ```javascript
 const { Type } = require("../models/models"); // импортируем модель Type
 const ApiError = require("../error/ApiError"); // импортируем хендлер ошибок
@@ -525,30 +525,28 @@ module.exports = new BrandController();
 Библиотека для работы с картинками - `express-fileupload`.  
 #### Зарегестрировать пакет в `index.js`:
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
-const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
-const cors = require("cors") // импорт cors
-const router = require("./routes/index"); // импортируем маршруты
-const errorHandler = require("./middleware/ErrorHandingMiddleware"); // импортируем хендлер ошибок
+require("dotenv").config(); 
+const express = require('express'); 
+const sequelize = require("./db"); 
+const cors = require("cors") 
+const router = require("./routes/index"); 
+const errorHandler = require("./middleware/ErrorHandingMiddleware"); 
 const fileUpload = require("express-fileupload"); // импортируем fileupload
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
-conxt app = express(); // объект для запуска приложения
-app.use(cors()) // подключаем CORS
-app.use(express.json()) // для парсинга json формата
-app.use("/api", router); // для использования маршрутов в приложении
+conxt app = express(); 
+app.use(cors()) 
+app.use(express.json()) 
+app.use("/api", router); 
 app.use(fileUpload({})); // регестрируем fileUpload
 
-
-// Обработка ошибок должна быть в конце
 app.use(errorHandler);
-const start = async () => { // функция для старта приложения
+const start = async () => { 
   try {
-    await sequelize.authenticate(); // для проверки соединения с базой данных
-    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+    await sequelize.authenticate(); 
+    await sequelize.sync() 
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); 
   } catch (error) {
     console.log(error);
   }
@@ -563,7 +561,7 @@ start();
 ### Файл `deviceController.js`
 ```javascript
 const uuid = require("uuid");
-const { Device, DeviceInfo } = require("../models/models");
+const { Device } = require("../models/models");
 const ApiError = require("../error/ApiError");
 
 class DeviceController {
@@ -592,41 +590,374 @@ class DeviceController {
 
 module.exports = new DeviceController();
 ```
-### Раздача СТАТИЧЕСКИХ файлом, которые находятся на нашем сервере.
-Для раздачи статических файлов необходимо указать серверу явно.  
-Файлы будут раздаваться из папки `static`.
+### Раздача СТАТИЧЕСКИХ файлов, которые находятся на нашем сервере.
+Для раздачи статических файлов необходимо указать серверу явно, что файлы будут раздаваться из папки `static`.
 ### Файл `index.js` 
 ```javascript
-require("dotenv").config(); // для загрузки переменных окружения из файла .env
-const express = require('express'); // импорт express
-const sequelize = require("./db"); // импортируем созданный объект типа Sequelize
-const cors = require("cors") // импорт cors
-const router = require("./routes/index"); // импортируем маршруты
-const errorHandler = require("./middleware/ErrorHandingMiddleware"); // импортируем хендлер ошибок
-const fileUpload = require("express-fileupload"); // импортируем fileupload
+require("dotenv").config(); 
+const express = require('express'); 
+const sequelize = require("./db"); 
+const cors = require("cors") 
+const router = require("./routes/index"); 
+const errorHandler = require("./middleware/ErrorHandingMiddleware"); 
+const fileUpload = require("express-fileupload"); 
 const path = require("path") // импортируем библиотеку для универсального указания пути
 
-const PORT = process.env.PORT || 5000; //переменная для хранения порта приложения
+const PORT = process.env.PORT || 5000; 
 
-conxt app = express(); // объект для запуска приложения
-app.use(cors()) // подключаем CORS
-app.use(express.json()) // для парсинга json формата
+conxt app = express(); 
+app.use(cors()) 
+app.use(express.json()) 
 app.use(express.static(path.resolve(__dirname, "static"))) // явно указываем из какой папки сервер будет раздовать статику
-app.use(fileUpload({})); // регестрируем fileUpload
-app.use("/api", router); // для использования маршрутов в приложении
+app.use(fileUpload({})); 
+app.use("/api", router); 
 
-
-// Обработка ошибок должна быть в конце
 app.use(errorHandler);
-const start = async () => { // функция для старта приложения
+const start = async () => { 
   try {
-    await sequelize.authenticate(); // для проверки соединения с базой данных
-    await sequelize.sync() // создает таблицы в базе данных на основе определений моделей, если они еще не существуют
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); // запускаем сервер
+    await sequelize.authenticate(); 
+    await sequelize.sync() 
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`)); 
   } catch (error) {
     console.log(error);
   }
 };
 
 start();
+```
+
+## 9. Получение устройств, фильтрация, пагинация - постраничный вывод
+### Файл `deviceController.js`:
+```javascript
+const uuid = require("uuid");
+const path = require("path");
+const { Device } = require("../models/models");
+const ApiError = require("../error/ApiError");
+
+class DeviceController {
+  async create(req, res, next) {
+    try {
+      let { name, price, brandId, typeId, info } = req.body;
+      const { img } = req.files;
+      let fileName = uuid.v4() + ".jpg";
+      img.mv(path.resolve(__dirname, "..", "static", fileName));
+
+      const device = await Device.create({
+        name,
+        price,
+        brandId,
+        typeId,
+        img: fileName,
+      });
+
+      return res.json(device);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
+    }
+  }
+
+  async getAll(req, res) {
+    // получаем brandId, typId из строки запроса req.query
+    let { brandId, typeId, limit, page } = req.query;
+    // переменные для отображения в ограниченном количестве
+    page = page || 1; // страница
+    limit = limit || 9; // количество device
+    let offset = page * limit - limit; // отступ для отображения следующих device
+    let devices; // переменная для хранения devices
+    // Если brandId, typId не указаны, будем возвращать все divece
+    if (!brandId && !typeId) {
+      // из БД получаем все device
+      devices = await Device.findAndCountAll({ limit, offset }); 
+    }
+    // фильтрация только по бренду
+    if (brandId && !typeId) {
+      // получаем все device в которых указан brand
+      devices = await Device.findAndCountAll({
+        where: { brandId },
+        limit,
+        offset,
+      });
+    }
+    // фильтрация только по типу
+    if (!brandId && typeId) {
+      // получаем все device в которых указан type
+      devices = await Device.findAndCountAll({
+        where: { typeId },
+        limit,
+        offset,
+      });
+    }
+    // фильтрация по типу и по бренду
+    if (brandId && typeId) {
+      // получаем все device в которых указан и type и brand
+      devices = await Device.findAndCountAll({
+        where: { typeId, brandId },
+        limit,
+        offset,
+      });
+    }
+    return res.json(devices); // возвращаем все найденные device
+  }
+  async getOne(req, res) { }
+}
+
+module.exports = new DeviceController();
+```
+При использовании функции findAndCountAll в ответе от БД приходит поле count, в котором записано общее количесвто найденных позиций по фильтру brandId && typeId.
+
+### info для device
+Добавляем в связь сущностей Device и DeviceInfo название поля которое будет у массива характеристик.
+### Файл `models.js`:
+```javascript
+const sequelize = require("../db");
+const { DataTypes } = require("sequelize");
+
+const User = sequelize.define("user", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  email: { type: DataTypes.STRING, unique: true },
+  password: { type: DataTypes.STRING },
+  role: { type: DataTypes.STRING, defaultValue: "USER" },
+});
+
+const Basket = sequelize.define("basket", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
+const BasketDevice = sequelize.define("basket_device", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
+const Device = sequelize.define("device", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, unique: true, allowNull: false },
+  price: { type: DataTypes.FLOAT, allowNull: false },
+  rating: { type: DataTypes.FLOAT, defaultValue: 0 },
+  img: { type: DataTypes.STRING, allowNull: false },
+});
+
+const Type = sequelize.define("type", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, unique: true, allowNull: false },
+});
+
+const Brand = sequelize.define("brand", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  name: { type: DataTypes.STRING, unique: true, allowNull: false },
+});
+
+const Rating = sequelize.define("rating", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  rate: { type: DataTypes.INTEGER, allowNull: false },
+});
+
+const DeviceInfo = sequelize.define("device_info", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  title: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.STRING, allowNull: false },
+});
+
+const TypeBrand = sequelize.define("type_brand", {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+});
+
+User.hasOne(Basket);
+Basket.belongsTo(User);
+
+User.hasMany(Rating);
+Rating.belongsTo(User);
+
+Basket.hasMany(BasketDevice);
+BasketDevice.belongsTo(Basket);
+
+Type.hasMany(Device);
+Device.belongsTo(Type);
+
+Brand.hasMany(Device);
+Device.belongsTo(Brand);
+
+Device.hasMany(Rating);
+Rating.belongsTo(Device);
+
+Device.hasMany(BasketDevice);
+BasketDevice.belongsTo(Device);
+// добавляем название поля которое будет у массива характеристик {as: "info"}
+Device.hasMany(DeviceInfo, {as: "info"});
+DeviceInfo.belongsTo(Device);
+
+Type.belongsToMany(Brand, { through: TypeBrand });
+Brand.belongsToMany(Type, { through: TypeBrand });
+
+module.exports = {
+  User,
+  Basket,
+  BasketDevice,
+  Device,
+  Type,
+  Brand,
+  Rating,
+  TypeBrand,
+  DeviceInfo,
+};
+```
+
+### Файл `deviceController.js`:
+```javascript
+const uuid = require("uuid");
+const path = require("path");
+const { Device, DeviceInfo } = require("../models/models"); // добавляем DeviceInfo
+const ApiError = require("../error/ApiError");
+
+class DeviceController {
+  async create(req, res, next) {
+    try {
+      let { name, price, brandId, typeId, info } = req.body;
+      const { img } = req.files;
+      let fileName = uuid.v4() + ".jpg";
+      img.mv(path.resolve(__dirname, "..", "static", fileName));
+
+      const device = await Device.create({
+        name,
+        price,
+        brandId,
+        typeId,
+        img: fileName,
+      });
+      // если info есть в теле запроса
+      if (info) {
+        info = JSON.parse(info); // парсим данные, т.к. через form-data они приходят в формате строки
+        info.forEach((i) => // пробегаемся по массиву
+          DeviceInfo.create({ // создаем device с полем info
+            title: i.title,
+            description: i.description,
+            deviceId: device.id,
+          })
+        );
+      }
+
+      return res.json(device);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
+    }
+  }
+  async getAll(req, res) {
+    let { brandId, typeId, limit, page } = req.query;
+    page = page || 1;
+    limit = limit || 9;
+    let offset = page * limit - limit;
+    let devices;
+    if (!brandId && !typeId) {
+      devices = await Device.findAndCountAll({ limit, offset });
+    }
+    if (brandId && !typeId) {
+      devices = await Device.findAndCountAll({
+        where: { brandId },
+        limit,
+        offset,
+      });
+    }
+    if (!brandId && typeId) {
+      devices = await Device.findAndCountAll({
+        where: { typeId },
+        limit,
+        offset,
+      });
+    }
+    if (brandId && typeId) {
+      devices = await Device.findAndCountAll({
+        where: { typeId, brandId },
+        limit,
+        offset,
+      });
+    }
+    return res.json(devices);
+  }
+  async getOne(req, res) { }
+}
+
+module.exports = new DeviceController();
+```
+### Получение одного device (функция getOne())
+### Файл `deviceController.js`:
+```javascript
+const uuid = require("uuid");
+const path = require("path");
+const { Device, DeviceInfo } = require("../models/models");
+const ApiError = require("../error/ApiError");
+
+class DeviceController {
+  async create(req, res, next) {
+    try {
+      let { name, price, brandId, typeId, info } = req.body;
+      const { img } = req.files;
+      let fileName = uuid.v4() + ".jpg";
+      img.mv(path.resolve(__dirname, "..", "static", fileName));
+
+      const device = await Device.create({
+        name,
+        price,
+        brandId,
+        typeId,
+        img: fileName,
+      });
+
+      if (info) {
+        info = JSON.parse(info);
+        info.forEach((i) =>
+          DeviceInfo.create({
+            title: i.title,
+            description: i.description,
+            deviceId: device.id,
+          })
+        );
+      }
+
+      return res.json(device);
+    } catch (error) {
+      next(ApiError.badRequest(error.message));
+    }
+  }
+  async getAll(req, res) {
+    let { brandId, typeId, limit, page } = req.query;
+    page = page || 1;
+    limit = limit || 9;
+    let offset = page * limit - limit;
+    let devices;
+    if (!brandId && !typeId) {
+      devices = await Device.findAndCountAll({ limit, offset });
+    }
+    if (brandId && !typeId) {
+      devices = await Device.findAndCountAll({
+        where: { brandId },
+        limit,
+        offset,
+      });
+    }
+    if (!brandId && typeId) {
+      devices = await Device.findAndCountAll({
+        where: { typeId },
+        limit,
+        offset,
+      });
+    }
+    if (brandId && typeId) {
+      devices = await Device.findAndCountAll({
+        where: { typeId, brandId },
+        limit,
+        offset,
+      });
+    }
+    return res.json(devices);
+  }
+  // Функция для получения одного devie
+  async getOne(req, res) {
+    const { id } = req.params; // получаем id из параметров которые в url строке
+    const device = await Device.findOne({ // находим один device
+      where: { id }, // device определенного id
+      include: [{ model: DeviceInfo, as: "info" }], // include используется для подгрузки информации из другой сущности DeviceInfo с полем info
+    });
+    return res.json(device); // возвращаем device на клиент
+  }
+}
+
+module.exports = new DeviceController();
 ```

@@ -9,6 +9,9 @@
 7. Получение объектов Type и Brand из Базы Данных.
 8. Работа с файлами (загружаем картинки)
 9. Получение устройств, фильтрация, пагинация - постраничный вывод
+10. Регистрация и авторизация. JWT токен. dcrypt.
+11. middleware для Авторизации. Декодировать и проверять токен на валидность.
+12. middleware для Проверки Роли Пользователя. 
 
 ## Используемые технологии:
 1. node.js - платформа для яп JS
@@ -31,7 +34,7 @@
 4. `npm install cors`
 5. `npm install dotenv`
 6. `npm install -D nodemon`
-7. `npm install jsonwebtoken`
+7. `npm install jsonwebtoken` - **для генерации JWT токена**
 8. `npm install bcrypt` - **для хеширования паролей**
 9. `npm install express-fileupload` - **для хеширования паролей**
 10. `npm install uuid` - **для генерации уникальных идентификаторов**
@@ -961,4 +964,248 @@ class DeviceController {
 }
 
 module.exports = new DeviceController();
+```
+
+## 10. Регистрация и авторизация. JWT токен. dcrypt.
+### Файл `userController.js`
+#### Регистрация:
+```javascript
+require("dotenv").config();
+const ApiError = require("../error/ApiError");
+const bcrypt = require("bcrypt"); // импортируем bcrypt
+const jwt = require("jsonwebtoken"); // импортируем jsonwebtoken
+const { User, Basket } = require("../models/models"); // импортируем модели пользователя и корзины
+
+const generateJwt = (id, email, role) => { // функция для генерации JWT токена, принимает id email кщду
+  return jwt.sign(
+    { id, email, role }, // первая часть JWT токена
+    process.env.SECRET_KEY, // секретная фраза из файла .env
+    { expiresIn: "24h",} // время активности токена
+    );
+};
+
+class UserController {
+  async registration(req, res, next) {
+    const { email, password, role } = req.body; // получаем из тела мыло пароль и роль 
+    if (!email || !password) { // если мыло или пароль пустые
+      return next(ApiError.badRequest("Некорректный email или password")); // возвращаем ошибку
+    }
+    const candidate = await User.findOne({ where: { email } }); // находим пользователя с мылом в БД
+    if (candidate) { // если такой пользователь уже есть
+      return next(
+        ApiError.badRequest("Пользователь с таким email уже существует!") // возвращаем ошибку
+      );
+    }
+    // если мыло новое и пароль заполнен
+    const hashPassword = await bcrypt.hash(password, 5); // хэшируем пароль
+    const user = await User.create({ email, role, password: hashPassword }); // создаем нового пользователя
+    const basket = await Basket.create({ userId: user.id }); // создаем корзину для пользователя
+    const token = generateJwt(user.id, user.email, user.role); // генерируем JWT токен из id, email, role
+    return res.json({ token }); // возвращаем 
+  }
+  async login(req, res, next) {}
+  async check(req, res, next) {}
+}
+
+module.exports = new UserController();
+```
+### Файл Файл `userController.js`
+#### Функция логина
+```javascript
+require("dotenv").config();
+const ApiError = require("../error/ApiError");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { User, Basket } = require("../models/models");
+
+const generateJwt = (id, email, role) => {
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: "24h",
+  });
+};
+
+class UserController {
+  async registration(req, res, next) {
+    const { email, password, role } = req.body;
+    if (!email || !password) {
+      return next(ApiError.badRequest("Некорректный email или password"));
+    }
+    const candidate = await User.findOne({ where: { email } });
+    if (candidate) {
+      return next(
+        ApiError.badRequest("Пользователь с таким email уже существует!")
+      );
+    }
+    const hashPassword = await bcrypt.hash(password, 5);
+    const user = await User.create({ email, role, password: hashPassword });
+    const basket = await Basket.create({ userId: user.id });
+    const token = generateJwt(user.id, user.email, user.role);
+    return res.json({ token });
+  }
+  // Функция Login для пользователя
+  async login(req, res, next) {
+    const { email, password } = req.body; // получаем из тела ьыло и пароль
+    const user = await User.findOne({ where: { email } }); // находим в БД такого пользователя
+    if (!user) { // если такого пользователя нет
+      return next(ApiError.internal("Пользователь с таким mail не найден")); // возвращаем ошибку
+    }
+    // проверяем пароль с помощью функции compareSync
+    let comparePassword = bcrypt.compareSync(password, user.password);
+    if (!comparePassword) { // если пароли не совпадают
+      return next(ApiError.internal("Указан неверный пароль")); // возвращаем ошибку
+    }
+    // если логин и пароль верные
+    const token = generateJwt(user.id, user.email, user.role); // генерируем JWT токен с помощью функции generateJwt
+    return res.json({ token }); // возвращаем JWT токен на клиент
+  }
+  async check(req, res, next) {}
+}
+
+module.exports = new UserController();
+```
+## 11. middleware для Авторизации. Декодировать и проверять токен на валидность.
+### Файл `authMiddleware.js` в папке middleware
+```javascript
+const jwt = require("jsonwebtoken"); // импортируем jsonwebtoken
+
+module.exports = function (req, res, next) {
+  if (req.method === "OPTIONS") { // пропускаем метод OPTIONS
+    next();
+  }
+  try {
+    const token = req.headers.authorization.split(" ")[1]; // получаем токен из запроса, где req.headers.authorization.split(" ")[1] - это Тип токена
+    if (!token) { // если токена нет
+      return res.status(401).json({ message: "Не авторизован" }); // пользователь не авторизован
+    }
+    // раскодируем токен
+    const decoded = jwt.verify(token, process.env.SECRET_KEY); // с помощью функции verify, куда передаем токен и секретную фразу
+    req.user = decoded; // добавляем данные, которые мы вытащили к request
+    next(); // вызываем следующий middleware
+  } catch (error) { // если ошибка возникла
+    res.status(401).json({ message: "Не авторизован" }); // возвращаем сообщение, о том что пользователь не авторизован
+  }
+};
+```
+
+### Файл `userController.js`.
+```javascript
+require("dotenv").config();
+const ApiError = require("../error/ApiError");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { User, Basket } = require("../models/models");
+
+const generateJwt = (id, email, role) => {
+  return jwt.sign({ id, email, role }, process.env.SECRET_KEY, {
+    expiresIn: "24h",
+  });
+};
+
+class UserController {
+  async registration(req, res, next) {
+    const { email, password, role } = req.body;
+    if (!email || !password) {
+      return next(ApiError.badRequest("Некорректный email или password"));
+    }
+    const candidate = await User.findOne({ where: { email } });
+    if (candidate) {
+      return next(
+        ApiError.badRequest("Пользователь с таким email уже существует!")
+      );
+    }
+    const hashPassword = await bcrypt.hash(password, 5);
+    const user = await User.create({ email, role, password: hashPassword });
+    const basket = await Basket.create({ userId: user.id });
+    const token = generateJwt(user.id, user.email, user.role);
+    return res.json({ token });
+  }
+  async login(req, res, next) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return next(ApiError.internal("Пользователь с таким mail не найден"));
+    }
+    let comparePassword = bcrypt.compareSync(password, user.password);
+    if (!comparePassword) {
+      return next(ApiError.internal("Указан неверный пароль"));
+    }
+    const token = generateJwt(user.id, user.email, user.role);
+    return res.json({ token });
+  }
+  // добавляем функцию check
+  async check(req, res, next) {
+    const token = generateJwt(req.user.id, req.user.email, req.user.role); // генерация нового токена. Если пользователь постоянно использует свой аккаунт токен у него будет перезаписываться.
+    return res.json({ token }); // отправка нового токена клиенту
+  }
+}
+
+module.exports = new UserController();
+```
+### Файл `userRouter.js`.
+```javascript
+const Router = require("express");
+const router = new Router();
+const userController = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware"); // импортируем полученный middleware для проверки пользователя
+
+router.post("/registration", userController.registration);
+router.post("/login", userController.login);
+router.get("/auth", authMiddleware, userController.check); // добавляем проверку при вызове get запроса 
+
+module.exports = router;
+```
+
+## 12. middleware для Проверки Роли Пользователя. 
+Добавлять типы, бренды, товары может только АДМИНИСТРАТОР.
+### Файл `chekRoleMiddleware.js` в папке middleware.
+```javascript
+const jwt = require("jsonwebtoken");
+
+module.exports = function (role) { // экспортируем функцию, которая принимает параметром role
+  return function (req, res, next) { // возвращаем функцию
+    if (req.method === "OPTIONS") { // пропускаем метод OPTIONS
+      next(); // сразу вызываем следующую функцию
+    }
+    try {
+      const token = req.headers.authorization.split(" ")[1]; // получаем токен
+      if (!token) { // если токена нет
+        return res.status(401).json({ message: "Не авторизован" }); // выводим сообщение
+      }
+      // декодируем полученный токен
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      if (decoded.role !== role) { // если роли не совпадают
+        return res.status(403).json({ message: "Нет доступа" }); // выдаем сообщение о том, что нет доступа
+      }
+      // если роль нужная
+      req.user = decoded; // помещаем информацию в request 
+      next(); // вызываем следующий middleware
+    } catch (error) {
+      res.status(401).json({ message: "Не авторизован" }); // сообщение об ошибки
+    }
+  };
+};
+```
+### Файл `typeRouter.js`.
+```javascript
+const Router = require("express");
+const router = new Router();
+const typeController = require("../controllers/typeController");
+const checkRole = require("../middleware/checkRoleMiddleware"); // импортируем функцию проверки роли
+
+router.post("/", checkRole("ADMIN"), typeController.create); // проверяем роль перед созданием ТИПА
+router.get("/", typeController.getAll);
+
+module.exports = router;
+```
+### Файл `brandRouter.js`.
+```javascript
+const Router = require("express");
+const router = new Router();
+const brandController = require("../controllers/brandController");
+const checkRole = require("../middleware/checkRoleMiddleware"); // импортируем функцию проверки роли
+
+router.post('/', checkRole("ADMIN"), brandController.create)
+router.get('/', brandController.getAll)
+
+module.exports = router;
 ```

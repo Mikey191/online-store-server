@@ -203,6 +203,7 @@ module.exports = {
 require("dotenv").config(); 
 const express = require('express'); 
 const sequelize = require("./db"); 
+const models = require("./models/models"); // импорт всех моделей
 const cors = require("cors") // импорт cors
 
 const PORT = process.env.PORT || 5000; 
